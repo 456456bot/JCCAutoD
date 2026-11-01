@@ -133,6 +133,13 @@ class TargetList:
     def dispatch(self, name, action):
         return self.dispatch_purchase(name, action)[0]
 
+    def dispatch_if_nonempty(self, action):
+        with self._lock:
+            if not self._names:
+                return False
+            action()
+            return True
+
     def dispatch_purchase(self, name, action, upgrade=0):
         with self._lock:
             if name not in self._names:

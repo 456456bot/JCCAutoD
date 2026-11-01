@@ -157,7 +157,7 @@ def run():
         )
         state["display_scale"] = scale
         preview = overlay.resize((round(image.width * scale), round(image.height * scale)))
-        state["photo"] = ImageTk.PhotoImage(preview)
+        state["photo"] = ImageTk.PhotoImage(preview, master=canvas)
         canvas.delete("all")
         canvas.create_image(0, 0, image=state["photo"], anchor="nw")
 
@@ -283,7 +283,7 @@ def run():
         if state["image"] is not None:
             crop = state["image"].crop(row["box"])
             crop.thumbnail((180, 180))
-            photo = ImageTk.PhotoImage(crop)
+            photo = ImageTk.PhotoImage(crop, master=popup)
             label = ttk.Label(popup, image=photo)
             label.image = photo
             label.pack(padx=15, pady=10)

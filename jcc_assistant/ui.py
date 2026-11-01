@@ -13,9 +13,11 @@ from .lineup.storage import PROFILES, load_profile
 from .mumu import MuMu
 from .purchasing import Buyer
 from .recognition import Recognizer
+from .search import AUTOMATIC, MANUAL, AutoSearchSession, SearchControl
 from .selection import read_selection
 from .settings import validate_targets
 from .targets import TargetList
+from .ui_messages import UiMessages
 from .upgrade import RULE_LABELS, UpgradeDetector
 from .windows import center_new_windows
 
@@ -23,16 +25,26 @@ from .windows import center_new_windows
 def run():
     root = tk.Tk()
     center_new_windows(root)
-    root.title("金铲铲商店助手 · 详情快捷选牌版")
-    root.geometry("1000x760")
-    ttk.Label(root, text="列表非空即自动购买，列表为空即停止。可随时新增、修改、删除目标。").pack(
-        anchor="w", padx=16, pady=(16, 4)
-    )
+    root.title("金铲铲商店助手 · 双模式搜牌版")
+    root.geometry("1000x840")
+    search = SearchControl()
+    ttk.Label(
+        root, text="手动刷新辅助：列表非空自动买牌；自动搜牌：点击开始后自动买牌并刷新。"
+    ).pack(anchor="w", padx=16, pady=(16, 4))
     ttk.Label(
         root,
         text="小键盘 +／−：读取右侧详情，新增／移除目标（新增默认持续关注）；1～5：添加商店牌；F8 清空。",
         wraplength=960,
     ).pack(anchor="w", padx=16)
+    mode_bar = ttk.LabelFrame(root, text="运行模式", padding=8)
+    mode_bar.pack(fill="x", padx=16, pady=(8, 0))
+    mode_box = ttk.Combobox(mode_bar, state="readonly", values=[MANUAL, AUTOMATIC], width=18)
+    mode_box.set(MANUAL)
+    mode_box.pack(side="left", padx=(0, 16))
+    ttk.Label(mode_bar, text="金币下限：").pack(side="left")
+    floor_var = tk.StringVar(value="20")
+    floor_box = ttk.Spinbox(mode_bar, from_=0, to=9999, textvariable=floor_var, width=6)
+    floor_box.pack(side="left", padx=(4, 12))
     target_buttons = ttk.Frame(root)
     target_buttons.pack(anchor="w", padx=16, pady=10)
     status = tk.StringVar(value="目标列表为空，等待新增目标。")
@@ -101,7 +113,7 @@ def run():
         )
 
     default_box.bind("<<ComboboxSelected>>", default_changed)
-    messages = queue.Queue()
+    messages = UiMessages()
     selection_requests = queue.Queue(maxsize=5)
     click_counts = {}
     poll_state = {"id": None}
@@ -120,7 +132,14 @@ def run():
             progress_tree.insert(
                 "",
                 "end",
-                values=(name, click_counts.get(name, 0), RULE_LABELS[rules[name]], "正在监测"),
+                values=(
+                    name,
+                    click_counts.get(name, 0),
+                    RULE_LABELS[rules[name]],
+                    "待开始"
+                    if search.snapshot().mode == AUTOMATIC and not search.snapshot().running
+                    else "正在监测",
+                ),
             )
 
     def update_list(names, rules=None):
@@ -130,14 +149,11 @@ def run():
             return False
         targets.replace(names, rules)
         show_targets()
-        status.set(
-            f"正在监测 {len(names)} 个目标，列表修改立即生效。"
-            if names
-            else "目标列表为空，已停止。"
-        )
+        status.set(list_status())
         return True
 
     def emergency():
+        search.stop()
         targets.clear()
         messages.put(("cleared", "F8：目标已清空，已禁止后续购买", None))
 
@@ -164,8 +180,12 @@ def run():
         recognizer, device, buyer, upgrade_detector = None, None, None, None
         name_cache = ShopNameCache()
         processed_activations = {}
+        auto_session = None
+        last_epoch = None
         try:
-            while not closing.wait(0.01):
+            while not closing.is_set():
+                if search.snapshot().mode == MANUAL and closing.wait(0.01):
+                    break
                 try:
                     slot, requested_at, epoch = selection_requests.get_nowait()
                 except queue.Empty:
@@ -187,11 +207,25 @@ def run():
                     except Exception as exc:
                         messages.put(("notice", str(exc), None))
                     continue
+                cycle = search.snapshot()
+                if last_epoch != cycle.epoch:
+                    name_cache = ShopNameCache()
+                    processed_activations = {}
+                    auto_session = None
+                    last_epoch = cycle.epoch
                 revision, names = targets.snapshot()
                 if not names:
+                    if cycle.mode == AUTOMATIC and cycle.running:
+                        epoch = search.stop()
+                        messages.put(
+                            ("search", ("目标列表为空，自动搜牌已停止。", epoch, True), None)
+                        )
                     # Reset dedup after idle so re-adding starts immediately.
                     name_cache = ShopNameCache()
                     processed_activations = {}
+                    targets.wait()
+                    continue
+                if cycle.mode == AUTOMATIC and not cycle.running:
                     targets.wait()
                     continue
                 try:
@@ -201,6 +235,44 @@ def run():
                         device = MuMu()
                     if buyer is None:
                         buyer = Buyer(recognizer, [], threading.Event(), target_list=targets)
+                    if cycle.mode == AUTOMATIC:
+                        if auto_session is None:
+                            auto_session = AutoSearchSession(cycle.epoch)
+                        if upgrade_detector is None:
+                            upgrade_detector = UpgradeDetector()
+                        result = auto_session.step(
+                            device, recognizer, buyer, targets, search, upgrade_detector
+                        )
+                        revision = targets.snapshot()[0]
+                        messages.put(
+                            (
+                                "result",
+                                (
+                                    result.cards,
+                                    result.image.info.get("android_size", result.image.size),
+                                    result.capture_ms,
+                                    result.ocr_ms,
+                                    buyer.count,
+                                ),
+                                (revision, cycle.epoch),
+                            )
+                        )
+                        if result.message:
+                            messages.put(("purchase", (result.message, buyer.progress()), None))
+                        if result.note:
+                            epoch = (
+                                result.stopped_epoch
+                                if result.stopped_epoch is not None
+                                else cycle.epoch
+                            )
+                            messages.put(
+                                (
+                                    "search",
+                                    (result.note, epoch, result.stopped_epoch is not None),
+                                    None,
+                                )
+                            )
+                        continue
                     image, capture_ms = device.capture_shop()
                     cards, ocr_ms, _ = recognizer.recognize(image, names)
                     rules = targets.rules()
@@ -225,7 +297,7 @@ def run():
                                 ocr_ms,
                                 buyer.count,
                             ),
-                            revision,
+                            (revision, cycle.epoch),
                         )
                     )
                     changed = name_cache.changed([card.name for card in cards])
@@ -245,7 +317,11 @@ def run():
                     if not changed and not added and not hinted:
                         continue
                     outcome = buyer.attempt(
-                        device, image, cards, eligible_names=None if changed else added | hinted
+                        device,
+                        image,
+                        cards,
+                        eligible_names=None if changed else added | hinted,
+                        dispatch_guard=lambda action: search.dispatch(cycle.epoch, action),
                     )
                     if outcome:
                         messages.put(("purchase", (outcome, buyer.progress()), None))
@@ -254,8 +330,19 @@ def run():
                         messages.put(("cleared", "触控异常，目标已清空并停止。", None))
                         buyer = None
                 except Exception as exc:
-                    targets.clear()
-                    messages.put(("cleared", f"发生异常，目标已清空并停止：{exc}", None))
+                    if search.current(cycle.epoch):
+                        if cycle.mode == AUTOMATIC:
+                            epoch = search.stop()
+                            messages.put(
+                                (
+                                    "search",
+                                    (f"自动搜牌已停止：{exc}；目标列表保留。", epoch, True),
+                                    None,
+                                )
+                            )
+                        else:
+                            targets.clear()
+                            messages.put(("cleared", f"发生异常，目标已清空并停止：{exc}", None))
                     if device:
                         device.close()
                         device = None
@@ -265,9 +352,80 @@ def run():
                 device.close()
 
     def clear_targets():
+        search.stop()
         targets.clear()
+        sync_mode_controls()
         show_targets()
         status.set("目标已清空，已停止。")
+
+    def list_status():
+        count = len(targets.snapshot()[1])
+        state = search.snapshot()
+        if not count:
+            return "目标列表为空，已停止。"
+        if state.mode == AUTOMATIC:
+            return (
+                f"自动搜牌运行中，{count} 个目标。"
+                if state.running
+                else f"{count} 个目标已就绪，请点击“开始搜牌”。"
+            )
+        return f"正在监测 {count} 个目标，列表修改立即生效。"
+
+    def sync_mode_controls():
+        state = search.snapshot()
+        start_search_button.state(
+            ["!disabled"] if state.mode == AUTOMATIC and not state.running else ["disabled"]
+        )
+        stop_search_button.state(
+            ["!disabled"] if state.mode == AUTOMATIC and state.running else ["disabled"]
+        )
+        floor_box.state(["!disabled"] if state.mode == AUTOMATIC else ["disabled"])
+
+    def mode_changed(_=None):
+        search.set_mode(mode_box.get())
+        targets.wake()
+        sync_mode_controls()
+        show_targets()
+        status.set(list_status())
+
+    def floor_changed(*_):
+        try:
+            search.set_floor(int(floor_var.get()))
+        except (ValueError, tk.TclError):
+            pass
+
+    def start_search():
+        if not hotkey.ok:
+            messagebox.showerror("无法开始", "F8 注册失败，请先关闭旧版并重新启动。")
+            return
+        if not targets.snapshot()[1]:
+            messagebox.showinfo("没有目标", "请先添加目标或导入配置。")
+            return
+        try:
+            search.set_floor(int(floor_var.get()))
+            search.start()
+        except ValueError as exc:
+            messagebox.showerror("无法开始", str(exc))
+            return
+        targets.wake()
+        sync_mode_controls()
+        show_targets()
+        status.set(list_status())
+
+    def stop_search():
+        search.stop()
+        targets.wake()
+        sync_mode_controls()
+        show_targets()
+        status.set("自动搜牌已停止，目标列表保留。")
+
+    start_search_button = ttk.Button(mode_bar, text="开始搜牌", command=start_search)
+    start_search_button.pack(side="left", padx=4)
+    stop_search_button = ttk.Button(mode_bar, text="停止搜牌", command=stop_search)
+    stop_search_button.pack(side="left", padx=4)
+    mode_box.bind("<<ComboboxSelected>>", mode_changed)
+    floor_trace = floor_var.trace_add("write", floor_changed)
+    sync_mode_controls()
 
     def refresh_profiles(_=None):
         nonlocal profile_entries
@@ -306,7 +464,7 @@ def run():
                 profile["targets"],
                 {name: rules.get(name, targets.default_rule) for name in profile["targets"]},
             ):
-                log(f"已载入阵容：{profile['name']}（{profile['season_id']}），目标立即生效。")
+                log(f"已载入阵容：{profile['name']}（{profile['season_id']}）。" + list_status())
         except Exception as exc:
             messagebox.showerror("阵容载入失败", str(exc))
 
@@ -388,7 +546,16 @@ def run():
                 kind, value, revision = messages.get_nowait()
             except queue.Empty:
                 break
-            if kind == "selection":
+            if kind == "search":
+                text, epoch, stopped = value
+                if epoch != search.snapshot().epoch:
+                    continue
+                sync_mode_controls()
+                show_targets()
+                status.set(text)
+                if stopped:
+                    log(text)
+            elif kind == "selection":
                 slot, name, epoch = value
                 if not hotkey.ok:
                     log("F8 不可用，未添加目标。")
@@ -398,7 +565,7 @@ def run():
                     continue
                 show_targets()
                 note = (
-                    f"小键盘 {slot}：已添加并启用 {name}"
+                    f"小键盘 {slot}：已添加 {name}。" + list_status()
                     if added
                     else f"小键盘 {slot}：{name} 已在目标列表中"
                 )
@@ -428,12 +595,9 @@ def run():
                 click_counts.update(counts)
                 show_targets()
                 log(text)
-                status.set(
-                    f"正在监测 {len(targets.snapshot()[1])} 个目标。"
-                    if targets.snapshot()[1]
-                    else "目标列表为空，已停止。"
-                )
+                status.set(list_status())
             elif kind == "cleared":
+                sync_mode_controls()
                 show_targets()
                 status.set(value)
                 log(value)
@@ -442,6 +606,9 @@ def run():
                 log(value)
             elif kind == "result":
                 current_revision, names = targets.snapshot()
+                revision, epoch = revision
+                if epoch != search.snapshot().epoch:
+                    continue
                 if revision != current_revision or not names:
                     continue
                 cards, size, capture_ms, ocr_ms, count = value
@@ -464,15 +631,19 @@ def run():
         poll_state["id"] = root.after(50, poll)
 
     def close():
+        search.stop()
         targets.clear()
         closing.set()
         targets.wake()
         hotkey.close()
         if poll_state["id"]:
             root.after_cancel(poll_state["id"])
+        floor_var.trace_remove("write", floor_trace)
+        worker_thread.join(timeout=3)
         root.destroy()
 
     root.protocol("WM_DELETE_WINDOW", close)
-    threading.Thread(target=worker, daemon=False).start()
+    worker_thread = threading.Thread(target=worker, daemon=False)
+    worker_thread.start()
     poll()
     root.mainloop()

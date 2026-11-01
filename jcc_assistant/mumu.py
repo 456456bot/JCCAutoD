@@ -89,6 +89,16 @@ class MuMu:
                 )
                 hints.append(Image.frombytes("RGBA", (x2 - x1, y2 - y1), raw).convert("RGB"))
             image.info["upgrade_regions"] = hints
+            from .economy import economy_boxes
+
+            regions = {}
+            for key, (x1, y1, x2, y2) in economy_boxes(size).items():
+                raw = b"".join(
+                    C.string_at(address + (size[1] - 1 - y) * stride + x1 * 4, (x2 - x1) * 4)
+                    for y in range(y1, y2)
+                )
+                regions[key] = Image.frombytes("RGBA", (x2 - x1, y2 - y1), raw).convert("RGB")
+            image.info["economy_regions"] = regions
         elif region == "detail":
             from .detail import detail_anchor_box, detail_name_box, panel_visible
 

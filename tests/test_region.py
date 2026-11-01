@@ -42,6 +42,14 @@ class RegionTests(unittest.TestCase):
                 for box, patch in zip(hint_boxes(size), roi.info["upgrade_regions"]):
                     self.assertTrue(np.array_equal(np.asarray(full.crop(box)), np.asarray(patch)))
                 recognizer = Recognizer.__new__(Recognizer)
+                from jcc_assistant.economy import economy_boxes
+
+                for key, box in economy_boxes(size).items():
+                    self.assertTrue(
+                        np.array_equal(
+                            np.asarray(full.crop(box)), np.asarray(roi.info["economy_regions"][key])
+                        )
+                    )
                 for global_box, local_box in zip(
                     recognizer.regions(size), recognizer.regions_for(roi)
                 ):

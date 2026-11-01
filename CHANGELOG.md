@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased — 0.2.0
+
+- Add explicit Manual Assist / Auto Search modes, with start and stop controls.
+- Read current gold and refresh-button cost (0/1/2) from SDK frame crops.
+- Stop before a refresh would go below the configured gold floor; preserve targets.
+- Process purchases and refreshes sequentially without a fixed auto-refresh delay.
+- Wait for the refreshed shop and coin evidence; stop on uncertain numbers or a
+  missing refresh response. Reserve attempted purchase costs without purchase confirmation.
+- F8 and mode changes invalidate in-flight actions; add refresh audit records.
+
 ## 0.1.0 — 2026-11-01
 
 - MuMu SDK capture/touch in Android coordinates, with local shop-name OCR.

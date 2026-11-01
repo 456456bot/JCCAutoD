@@ -43,6 +43,11 @@ class Recognizer:
             for i in range(5)
         ]
 
+    def read_economy(self, image, price_slots=()):
+        from .economy import read_economy
+
+        return read_economy(self.engine, image, price_slots)
+
     def recognize_detail_name(self, image):
         crop = np.asarray(image.convert("RGB"))[:, :, ::-1].copy()
         output = self.engine.recognize_txt([crop])

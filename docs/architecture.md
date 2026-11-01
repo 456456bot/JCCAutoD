@@ -14,6 +14,10 @@ Android touch operations; no game API or memory access is used.
 - `purchasing.py`: direct touch dispatch and asynchronous JSONL audit.
 - `frame_cache.py`: adjacent five-name sequence deduplication.
 - `upgrade.py`: tiny shop-star masks/templates from the same captured frame.
+- `economy.py`, `search.py`: same-frame currency/price crops, explicit auto sessions,
+  coin-floor decisions and one-refresh-at-a-time receipts.
+- `ui_messages.py`: coalesced frame previews; stop/error/purchase events are never
+  queued behind thousands of stale previews.
 - `detail.py`, `selection.py`, `hotkey.py`: fresh read-only selection requests,
   expiration and F8 invalidation; no GUI operations on the hotkey thread.
 - `lineup/`: static planner grids, portrait features, plan stars, catalog imports,
@@ -39,6 +43,7 @@ errors clear targets. Tk widgets are updated only through the UI message queue.
 | Stage | Acceptance |
 | --- | --- |
 | Shop-name / hotkey OCR | Confidence >= 0.98 |
+| Currency and prices | Confidence >= 0.98; refresh cost must be 0, 1 or 2 |
 | Planner portrait | Highest normalized correlation > 0.60; no margin gate |
 | Shop upgrade / planner stars | Color masks and scaled templates with correlation thresholds in source |
 
@@ -64,6 +69,27 @@ calibration; source templates do not establish recognition accuracy for all mode
 
 ## Deliberate scope
 
-No battlefield inventory counting, model training, unit source tracking, automatic
-shop refreshing, precise purchase-count enforcement, or automatic three-star
+No battlefield inventory counting, model training, unit source tracking,
+precise purchase-count enforcement, or automatic three-star
 recognition from battlefield character models.
+
+## Automatic search
+
+The default remains manual-refresh assistance. Selecting Auto Search does not
+activate purchases; an explicit Start is required. Mode changes, Stop and F8
+invalidate an epoch checked immediately before purchases and refresh touches.
+Control and live-target locks serialize dispatch so clearing the last target or
+stopping cannot dispatch another action from a stale OCR result.
+
+A session processes a shop, attempts affordable target purchases, reserves their
+observed prices locally and re-reads gold/cost if necessary. Refresh is allowed
+only when effective gold minus the observed 0/1/2 cost is >= the current floor.
+This is a refresh floor, not a hard purchase spending limit. No purchase success
+confirmation is added; reservations can conservatively stop earlier.
+
+After a refresh, the session only reads until a usable new shop and sufficient
+coin evidence appear. A paid identical-name shop requires coin deduction and two
+reads. An unobservable free identical-name shop stops after the 3-second receipt
+timeout. There is no fixed auto-loop delay or simulated player refresh cadence.
+Low-confidence numbers or runtime errors stop auto mode while preserving targets.
+Refresh touches are audited as `refresh_sent`, independently of purchase counts.
