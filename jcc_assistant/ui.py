@@ -279,8 +279,9 @@ def run():
                     if any(rules.values()):
                         if upgrade_detector is None:
                             upgrade_detector = UpgradeDetector()
-                        for card, level in zip(cards, upgrade_detector.detect(image)):
-                            card.upgrade = level
+                        levels = upgrade_detector.detect(image)
+                        for card in cards:
+                            card.upgrade = levels[card.slot - 1]
                     # OCR may have overlapped list edits; use the latest snapshot.
                     revision, names, activations = targets.activation_snapshot()
                     if not names or closing.is_set():

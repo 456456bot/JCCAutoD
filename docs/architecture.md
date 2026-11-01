@@ -52,6 +52,11 @@ stars. Unknown portraits remain unnamed. Plan stars generate 0/2/3 rules; missin
 stars default to continuous. These static plan stars are separate from runtime
 shop upgrade hints and do not identify units on the live board.
 
+Shop hint regions extend above the card border to include animated stars. Resizing
+preserves their aspect ratio; template matches also require foreground/background
+overlap to reject solid gold decoration. Hints bind by slot ID, not list order.
+These changes still need live validation for previously missed three-star effects.
+
 ## Storage
 
 `configurations/Sx/sx_<name>.json` stores versioned profiles and per-name stop rules.
@@ -59,6 +64,10 @@ The shared library discovers legacy flat files too and skips invalid JSON. Write
 use same-directory temporary files and atomic replacement; valid overwritten
 profiles have one `.json.bak`. Runtime portrait caches, profiles and purchase logs
 are ignored by Git. `tests/fixtures` is an independent, limited offline catalog.
+For upgrade-rule purchases, `artifacts/purchases/hint_00.png` through `hint_29.png`
+form a bounded diagnostic ring containing same-frame star regions and shop names.
+Purchase audit rows link `hint_frame` and include `name_confidence`; no board image
+or portrait training collection is added.
 
 ## Supported calibration
 
@@ -93,3 +102,10 @@ reads. An unobservable free identical-name shop stops after the 3-second receipt
 timeout. There is no fixed auto-loop delay or simulated player refresh cadence.
 Low-confidence numbers or runtime errors stop auto mode while preserving targets.
 Refresh touches are audited as `refresh_sent`, independently of purchase counts.
+
+An uncertain nonempty name sequence is re-read once, or for at most 350ms if it
+keeps changing. It then proceeds without buying low-confidence slots. An entirely
+blank shop waits up to three seconds before stopping. One difficult non-target
+name no longer stops the session or prevents a refresh receipt. Leading/trailing
+middle dots from OCR noise are removed consistently in shop and detail selection;
+internal name separators remain intact.

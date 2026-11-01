@@ -6,6 +6,8 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
 
+from PIL import Image, ImageDraw
+
 from .settings import validate_targets
 
 AUDIT_WRITER = ThreadPoolExecutor(max_workers=1, thread_name_prefix="purchase-audit")
@@ -52,6 +54,25 @@ class Buyer:
 
         self.pending_logs.append(AUDIT_WRITER.submit(write))
 
+    def _save_hint_frame(self, image, cards):
+        """Keep a bounded local ring of same-frame names/stars for diagnosis."""
+        if image is None or not image.info.get("upgrade_regions"):
+            return None
+        path = self.log_dir / f"hint_{self.count % 30:02d}.png"
+        sheet = Image.new("RGB", (650, 190), "#202020")
+        draw = ImageDraw.Draw(sheet)
+        levels = {c.slot: c.upgrade for c in cards}
+        for i, patch in enumerate(image.info["upgrade_regions"]):
+            patch = patch.copy()
+            patch.thumbnail((118, 100))
+            sheet.paste(patch, (i * 130, 20))
+            draw.text((i * 130, 2), f"slot {i + 1}: {levels.get(i + 1, 0)}", fill="white")
+        strip = image.copy()
+        strip.thumbnail((650, 65))
+        sheet.paste(strip, (0, 122))
+        self.pending_logs.append(AUDIT_WRITER.submit(sheet.save, path))
+        return path.name
+
     def attempt(
         self,
         device,
@@ -92,7 +113,10 @@ class Buyer:
                 coordinate=card.center,
                 mode="direct_click",
                 shop_names=[c.name for c in sorted(cards, key=lambda c: c.slot)],
+                name_confidence=card.confidence,
             )
+            if self.target_list is not None and self.target_list.rules().get(card.name, 0):
+                row["hint_frame"] = self._save_hint_frame(initial, cards)
             try:
                 removed = False
                 sent = False

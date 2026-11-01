@@ -14,7 +14,7 @@ def hint_boxes(size):
     return [
         tuple(
             round(v * size[j % 2] / (2048, 1536)[j % 2])
-            for j, v in enumerate((432 + i * 300, 1272, 550 + i * 300, 1330))
+            for j, v in enumerate((432 + i * 300, 1244, 550 + i * 300, 1344))
         )
         for i in range(5)
     ]
@@ -54,14 +54,25 @@ class UpgradeDetector:
                     self.templates.append((level, mask))
 
     def classify(self, region):
-        region = region.resize((118, 58), Image.Resampling.BILINEAR)
+        # Keep the aspect ratio: expanding the capture must not squash stars.
+        region = region.resize(
+            (118, round(region.height * 118 / region.width)), Image.Resampling.BILINEAR
+        )
         masks = {level: color_mask(region, level) for level in (2, 3)}
         best = {2: 0.0, 3: 0.0}
         for level, template in self.templates:
-            if template.shape[0] > 58 or template.shape[1] > 118:
+            if template.shape[0] > region.height or template.shape[1] > region.width:
                 continue
             result = cv2.matchTemplate(masks[level], template, cv2.TM_CCOEFF_NORMED)
-            best[level] = max(best[level], float(result.max()))
+            _, score, _, (x, y) = cv2.minMaxLoc(result)
+            patch = masks[level][y : y + template.shape[0], x : x + template.shape[1]]
+            # A gold border/glow can correlate with a star's bright pixels.
+            # Require matching foreground AND background, not just correlation.
+            foreground = template > 0.5
+            overlap = np.count_nonzero((patch > 0.5) & foreground)
+            union = np.count_nonzero((patch > 0.5) | foreground)
+            if union and overlap / union >= 0.48:
+                best[level] = max(best[level], float(score))
         level = max(best, key=best.get)
         return level if best[level] >= 0.72 else 0
 

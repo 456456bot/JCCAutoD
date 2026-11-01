@@ -85,6 +85,51 @@ class SearchTests(unittest.TestCase):
                 self.assertEqual(bool(called), allowed)
                 self.assertEqual(result, "refreshed" if allowed else "limit")
 
+    def test_uncertain_non_target_retries_once_then_refreshes(self):
+        first = self.frame(22, 2)
+        first.info["cards"][2].confidence = 0.85
+        self.frames = [first, first.copy()]
+        self.assertIn("重读", self.step().note)
+        self.assertFalse(self.clicks)
+        self.step()
+        self.assertEqual(self.clicks, [refresh_point((2048, 1536))])
+
+    def test_blank_transition_waits_and_recovers_without_clicks(self):
+        blank = self.frame(22, 2)
+        for card in blank.info["cards"]:
+            card.name = ""
+        self.frames = [blank, self.frame(22, 2)]
+        self.assertIn("等待", self.step().note)
+        self.assertFalse(self.clicks)
+        self.step()
+        self.assertEqual(len(self.clicks), 1)
+
+    def test_persistently_blank_shop_stops_after_bounded_wait(self):
+        blank = self.frame(22, 2)
+        for card in blank.info["cards"]:
+            card.name = ""
+        self.frames = [blank, blank.copy()]
+        self.step()
+        self.clock = 3.1
+        with self.assertRaisesRegex(ValueError, "连续 3 秒"):
+            self.step()
+        self.assertFalse(self.clicks)
+
+    def test_low_confidence_target_is_not_bought(self):
+        frame = self.frame(22, 2, "目标")
+        frame.info["cards"][0].confidence = 0.85
+        self.frames = [frame, frame.copy()]
+        self.step()
+        self.step()
+        self.assertEqual(self.clicks, [refresh_point((2048, 1536))])
+
+    def test_refresh_receipt_accepts_changed_shop_with_uncertain_non_target(self):
+        before = self.frame(22, 2)
+        after = self.frame(20, 2, "新牌")
+        after.info["cards"][3].confidence = 0.8
+        receipt = RefreshReceipt(tuple(c.name for c in before.info["cards"]), 20, 2, 0)
+        self.assertTrue(receipt.ready(after.info["cards"], Economy(20, 2), 0.2))
+
     def test_start_stop_and_mode_change_invalidate_inflight_actions(self):
         epoch = self.control.snapshot().epoch
         self.control.stop()
@@ -149,6 +194,19 @@ class SearchTests(unittest.TestCase):
         self.assertFalse(self.targets.snapshot()[1])
         self.assertFalse(self.control.snapshot().running)
         self.assertIn("目标列表为空", result.note)
+
+    def test_hints_bind_by_slot_even_when_card_list_is_reordered(self):
+        self.targets.set_rule("目标", 3)
+        self.targets.add("保留")
+        frame = self.frame(20, 2, "目标")
+        cards = frame.info["cards"]
+        cards[1].name = "保留"
+        frame.info["cards"] = [cards[1], cards[0], *cards[2:]]
+        self.frames = [frame, self.frame(19, 2)]
+        self.step()
+        self.assertEqual(self.targets.snapshot()[1], ("保留",))
+        self.assertEqual(cards[0].upgrade, 3)
+        self.assertEqual(cards[1].upgrade, 0)
 
     def test_stopped_during_ocr_cannot_buy_or_refresh(self):
         self.frames = [self.frame(30, 2, "目标", 3)]

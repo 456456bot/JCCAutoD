@@ -38,6 +38,17 @@ class UpgradeTests(unittest.TestCase):
             self.assertEqual(self.detector.detect(image), [0] * 5)
             self.assertEqual(self.detector.detect(image.resize((1024, 768))), [0] * 5)
 
+    def test_expanded_region_preserves_stars_above_old_capture(self):
+        with Image.open(ASSETS / "video_source.png") as image:
+            star = image.crop((725, 73, 797, 109)).resize((118, 59))
+        for y in (0, 20, 40):
+            region = Image.new("RGB", (118, 100), "#202020")
+            region.paste(star, (0, y))
+            self.assertEqual(self.detector.classify(region), 3)
+
+    def test_solid_gold_is_not_a_three_star_hint(self):
+        self.assertEqual(self.detector.classify(Image.new("RGB", (118, 100), "#ffdb40")), 0)
+
     def test_name_strip_without_hint_metadata_never_invents_hint(self):
         image = Image.new("RGB", (1490, 52), "white")
         image.info["origin"] = (430, 1460)

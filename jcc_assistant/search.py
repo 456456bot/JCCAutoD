@@ -90,7 +90,7 @@ class RefreshReceipt:
         if now - self.sent_at > 3.0:
             raise ValueError("刷新后未等到可确认的新商店画面，自动搜牌已停止")
         names = tuple(c.name for c in cards)
-        usable = any(names) and all(not c.name or c.confidence >= 0.98 for c in cards)
+        usable = any(c.name and c.confidence >= 0.98 for c in cards)
         if not usable or economy.gold > self.expected_gold:
             self.same_count = 0
             return False
@@ -119,6 +119,8 @@ class AutoSearchSession:
         self.clock = clock
         self.receipt = None
         self.refresh_count = 0
+        self.uncertain_since = None
+        self.uncertain_names = None
 
     def step(self, device, recognizer, buyer, targets, control, detector):
         image, capture_ms = device.capture_shop()
@@ -132,11 +134,32 @@ class AutoSearchSession:
                 result.note = f"自动搜牌：等待第 {self.refresh_count} 次刷新画面；金币 {economy.gold}，显示费用 {economy.refresh_cost}。"
                 return result
             self.receipt = None
-        if not any(c.name for c in cards) or any(c.name and c.confidence < 0.98 for c in cards):
-            raise ValueError("商店名称不完整或不确定，自动搜牌已停止")
+        # Transitions and one difficult NON-target name must not abort a session.
+        # Re-read an uncertain shop once; stable names can proceed, while Buyer
+        # still only clicks names with confidence >= .98.
+        uncertain = not any(c.name for c in cards) or any(
+            c.name and c.confidence < 0.98 for c in cards
+        )
+        names_now = tuple(c.name for c in cards)
+        if uncertain:
+            now = self.clock()
+            if self.uncertain_since is None:
+                self.uncertain_since = now
+            if not any(names_now):
+                if now - self.uncertain_since > 3:
+                    raise ValueError("连续 3 秒未识别到商店名称，请检查游戏商店是否可见")
+                result.note = "自动搜牌：等待商店名称出现。"
+                return result
+            if names_now != self.uncertain_names and now - self.uncertain_since < 0.35:
+                self.uncertain_names = names_now
+                result.note = "自动搜牌：重读商店名称；低置信度卡牌不会购买。"
+                return result
+        self.uncertain_since = None
+        self.uncertain_names = None
         if any(targets.rules().values()):
-            for card, level in zip(cards, detector.detect(image)):
-                card.upgrade = level
+            levels = detector.detect(image)
+            for card in cards:
+                card.upgrade = levels[card.slot - 1]
         names = targets.snapshot()[1]
         slots = [c.slot for c in cards if c.name in names and c.confidence >= 0.98]
         economy = recognizer.read_economy(image, slots)

@@ -7,6 +7,12 @@ from PIL import Image, ImageDraw
 from rapidocr import RapidOCR
 
 
+def clean_name(text):
+    # UI particles are sometimes read as a trailing middle dot (e.g. 菲兹·).
+    # Preserve genuine internal separators such as 德文·阿曼博.
+    return re.sub(r"[^\u4e00-\u9fff·]", "", text).strip("·")
+
+
 @dataclass
 class Card:
     slot: int
@@ -51,7 +57,7 @@ class Recognizer:
     def recognize_detail_name(self, image):
         crop = np.asarray(image.convert("RGB"))[:, :, ::-1].copy()
         output = self.engine.recognize_txt([crop])
-        name = re.sub(r"[^\u4e00-\u9fff·]", "", output.txts[0]) if output.txts else ""
+        name = clean_name(output.txts[0]) if output.txts else ""
         score = float(output.scores[0]) if output.scores else 0.0
         return name, score
 
@@ -65,7 +71,7 @@ class Recognizer:
         box = self.regions_for(image)[slot - 1]
         crop = np.asarray(image.crop(box))[:, :, ::-1].copy()
         output = self.engine.recognize_txt([crop])
-        name = re.sub(r"[^\u4e00-\u9fff·]", "", output.txts[0]) if output.txts else ""
+        name = clean_name(output.txts[0]) if output.txts else ""
         score = float(output.scores[0]) if output.scores else 0.0
         width, height = image.info.get("android_size", image.size)
         center = (round((575 + (slot - 1) * 300) * width / 2048), round(1370 * height / 1536))
@@ -87,7 +93,7 @@ class Recognizer:
         found = {}
         if output.txts is not None:
             for row, (txt, score) in enumerate(zip(output.txts, output.scores)):
-                text = re.sub(r"[^\u4e00-\u9fff·]", "", txt)
+                text = clean_name(txt)
                 if 0 <= row < 5 and text and score > found.get(row, ("", 0))[1]:
                     found[row] = (text, float(score))
         cards = []

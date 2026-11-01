@@ -2,6 +2,13 @@
 
 ## Unreleased — 0.2.0
 
+- Retry transient/uncertain shop names instead of aborting auto-search for a
+  non-target OCR score; retain the confidence gate on purchases and currency.
+- Strip spurious leading/trailing OCR middle dots, including the observed 菲兹·.
+- Expand upgrade-hint capture vertically without distorting star shapes, filter
+  gold-background matches and bind hints explicitly to shop slot IDs.
+- Keep a local 30-image diagnostic ring of purchase-time star/name regions for
+  upgrade-rule targets; audit the image path and name confidence.
 - Add explicit Manual Assist / Auto Search modes, with start and stop controls.
 - Read current gold and refresh-button cost (0/1/2) from SDK frame crops.
 - Stop before a refresh would go below the configured gold floor; preserve targets.
