@@ -1,0 +1,11 @@
+{
+  "schema": "jcc.lineup",
+  "version": 1,
+  "id": "example-s16-goals",
+  "name": "示例：追牌条件",
+  "season_id": "s16",
+  "targets": ["蕾欧娜", "塔里克", "黛安娜"],
+  "stop_rules": {"蕾欧娜": 3, "塔里克": 2, "黛安娜": 0},
+  "slots": [],
+  "source": "example"
+}

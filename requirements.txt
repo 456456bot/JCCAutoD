@@ -1,0 +1,6 @@
+rapidocr>=3,<4
+onnxruntime>=1.23,<2
+Pillow>=12,<14
+requests>=2.32,<3
+opencv-python-headless>=4.10,<6
+numpy>=1.26,<3

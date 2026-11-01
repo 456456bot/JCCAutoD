@@ -1,0 +1,491 @@
+{
+  "schema": "jcc.portraits",
+  "version": 1,
+  "seasons": {
+    "s16": {
+      "name": "S16-海克斯典籍",
+      "champions": [
+        {
+          "id": "TFT16_Nautilus",
+          "name": "诺提勒斯",
+          "cost": 3,
+          "portraits": [
+            "images/b772115d6601c417563990c7.png",
+            "images/0e952c23381e060a7e4a252d.png"
+          ],
+          "url": "https://raw.communitydragon.org/pbe/game/assets/characters/tft16_nautilus/hud/tft16_nautilus_square.png",
+          "source": "CommunityDragon/pbe",
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_nautilus.png",
+          "official_id": "13324",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "TFT16_TwistedFate",
+          "name": "崔斯特",
+          "cost": 2,
+          "portraits": [
+            "images/58a4db15aead1300eba3e453.png",
+            "images/37601ce0db4a6365c801032b.png"
+          ],
+          "url": "https://raw.communitydragon.org/pbe/game/assets/characters/tft16_twistedfate/hud/tft16_twistedfate_square.png",
+          "source": "CommunityDragon/pbe",
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_twistedfate.png",
+          "official_id": "12404",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "TFT16_Gangplank",
+          "name": "普朗克",
+          "cost": 3,
+          "portraits": [
+            "images/71a44554a8cb879b73d16a79.png",
+            "images/f682902eb134cc10e7fa0396.png"
+          ],
+          "url": "https://raw.communitydragon.org/pbe/game/assets/characters/tft16_gangplank/hud/tft16_gangplank_square.png",
+          "source": "CommunityDragon/pbe",
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_gangplank.png",
+          "official_id": "13334",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "TFT16_Illaoi",
+          "name": "俄洛伊",
+          "cost": 1,
+          "portraits": [
+            "images/5df642f174c853d1f7425319.png",
+            "images/b98fcb6202797b2bf2e1445c.png"
+          ],
+          "url": "https://raw.communitydragon.org/pbe/game/assets/characters/tft16_illaoi/hud/tft16_illaoi_square.png",
+          "source": "CommunityDragon/pbe",
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_illaoi.png",
+          "official_id": "11409",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "TFT16_MissFortune",
+          "name": "厄运小姐",
+          "cost": 4,
+          "portraits": [
+            "images/9e4ec85e1ec651e707595d34.png",
+            "images/4b669e7be90a025480dd3f51.png"
+          ],
+          "url": "https://raw.communitydragon.org/pbe/game/assets/characters/tft16_missfortune/hud/tft16_missfortune_square.png",
+          "source": "CommunityDragon/pbe",
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_missfortune.png",
+          "official_id": "14344",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "TFT16_Zoe",
+          "name": "佐伊",
+          "cost": 3,
+          "portraits": [
+            "images/b468f75692a523802dd5532d.png",
+            "images/7fc172d02c36ec068a5e8b42.png"
+          ],
+          "url": "https://raw.communitydragon.org/pbe/game/assets/characters/tft16_zoe/hud/tft16_zoe_square.png",
+          "source": "CommunityDragon/pbe",
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_zoe.png",
+          "official_id": "13320",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "TFT16_Leona",
+          "name": "蕾欧娜",
+          "cost": 3,
+          "portraits": [
+            "images/0129ada493ebdc2453707f1a.png",
+            "images/0b11a0213c08bf792d82e716.png"
+          ],
+          "url": "https://raw.communitydragon.org/pbe/game/assets/characters/tft16_leona/hud/tft16_leona_square.png",
+          "source": "CommunityDragon/pbe",
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_leona.png",
+          "official_id": "13328",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "TFT16_Aphelios",
+          "name": "厄斐琉斯",
+          "cost": 2,
+          "portraits": [
+            "images/fb1371d98436cdf11319ccb6.png",
+            "images/774e77398ae37642bd9aa8a3.png"
+          ],
+          "url": "https://raw.communitydragon.org/pbe/game/assets/characters/tft16_aphelios/hud/tft16_aphelios_square.png",
+          "source": "CommunityDragon/pbe",
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_aphelios.png",
+          "official_id": "12417",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "TFT16_Taric",
+          "name": "塔里克",
+          "cost": 4,
+          "portraits": [
+            "images/4113f28d8005bcacbf448d18.png",
+            "images/4eb965833a236dce4b7c18ae.png"
+          ],
+          "url": "https://raw.communitydragon.org/pbe/game/assets/characters/tft16_taric/hud/tft16_taric_square.png",
+          "source": "CommunityDragon/pbe",
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_taric.png",
+          "official_id": "14335",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "TFT16_Anivia",
+          "name": "艾尼维亚",
+          "cost": 1,
+          "portraits": [
+            "images/5b431d4b64bb531901dcedec.png",
+            "images/66a32e59ad2e1220afe0f4f7.png"
+          ],
+          "url": "https://raw.communitydragon.org/pbe/game/assets/characters/tft16_anivia/hud/tft16_anivia_square.png",
+          "source": "CommunityDragon/pbe",
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_anivia.png",
+          "official_id": "11413",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "TFT16_Ashe",
+          "name": "艾希",
+          "cost": 2,
+          "portraits": [
+            "images/a0cf55457ba7aba2a605ca0f.png",
+            "images/124eccf9e7a70d9b2a1203b4.png"
+          ],
+          "url": "https://raw.communitydragon.org/pbe/game/assets/characters/tft16_ashe/hud/tft16_ashe_square.png",
+          "source": "CommunityDragon/pbe",
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_ashe.png",
+          "official_id": "12416",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "TFT16_Braum",
+          "name": "布隆",
+          "cost": 4,
+          "portraits": [
+            "images/4e6608ba24cf7407d1085009.png",
+            "images/23549477395d76be503e89dd.png"
+          ],
+          "url": "https://raw.communitydragon.org/pbe/game/assets/characters/tft16_braum/hud/tft16_braum_square.png",
+          "source": "CommunityDragon/pbe",
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_braum.png",
+          "official_id": "14352",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "TFT16_Lissandra",
+          "name": "丽桑卓",
+          "cost": 4,
+          "portraits": [
+            "images/fac4eec817258eabc3b7bb90.png",
+            "images/3b71c7907bd5a8e04d257266.png"
+          ],
+          "url": "https://raw.communitydragon.org/pbe/game/assets/characters/tft16_lissandra/hud/tft16_lissandra_square.png",
+          "source": "CommunityDragon/pbe",
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_lissandra.png",
+          "official_id": "14346",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "TFT16_Ornn",
+          "name": "奥恩",
+          "cost": 5,
+          "portraits": [
+            "images/af4d9ea9bfe1e4b5f0795509.png",
+            "images/b0c5f1a195a1709a311f5726.png"
+          ],
+          "url": "https://raw.communitydragon.org/pbe/game/assets/characters/tft16_ornn/hud/tft16_ornn_square.png",
+          "source": "CommunityDragon/pbe",
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_ornn.png",
+          "official_id": "15281",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "TFT16_TahmKench",
+          "name": "塔姆",
+          "cost": 5,
+          "portraits": [
+            "images/4c959ac8bd1f253799fee2b5.png",
+            "images/e749d7473370ea71535ce01f.png"
+          ],
+          "url": "https://raw.communitydragon.org/pbe/game/assets/characters/tft16_tahmkench/hud/tft16_tahmkench_square.png",
+          "source": "CommunityDragon/pbe",
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_tahmkench.png",
+          "official_id": "15276",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "TFT16_Sejuani",
+          "name": "瑟庄妮",
+          "cost": 3,
+          "portraits": [
+            "images/1f1835fd78574fafe83ccff1.png",
+            "images/6e911059f9a8e62a8128d96c.png"
+          ],
+          "url": "https://raw.communitydragon.org/pbe/game/assets/characters/tft16_sejuani/hud/tft16_sejuani_square.png",
+          "source": "CommunityDragon/pbe",
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_sejuani.png",
+          "official_id": "13322",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "TFT16_AurelionSol",
+          "name": "奥瑞利安·索尔",
+          "cost": 5,
+          "portraits": [
+            "images/29231c0231a75186a68c21e1.png",
+            "images/40c0881a21783dcce749644a.png",
+            "images/eb0da47cc075eee2063c6eff.png"
+          ],
+          "url": "https://raw.communitydragon.org/pbe/game/assets/characters/tft16_aurelionsol/hud/tft16_aurelionsol_square.png",
+          "source": "CommunityDragon/pbe",
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_aurelionsol.png",
+          "official_id": "15291",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "TFT16_Fizz",
+          "name": "菲兹",
+          "cost": 4,
+          "portraits": [
+            "images/943105fab128759bb484a9c1.png",
+            "images/11af3424071c5ed484285de2.png"
+          ],
+          "url": "https://raw.communitydragon.org/pbe/game/assets/characters/tft16_fizz/hud/tft16_fizz_square.png",
+          "source": "CommunityDragon/pbe",
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_fizz.png",
+          "official_id": "14350",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "TFT16_Volibear",
+          "name": "沃利贝尔",
+          "cost": 5,
+          "portraits": [
+            "images/e3e49b4eafeeac147781a937.png",
+            "images/f59086f0f5e7920a0acd5d45.png"
+          ],
+          "url": "https://raw.communitydragon.org/pbe/game/assets/characters/tft16_volibear/hud/tft16_volibear_square.png",
+          "source": "CommunityDragon/pbe",
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_volibear.png",
+          "official_id": "15273",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "TFT16_Tryndamere",
+          "name": "泰达米尔",
+          "cost": 2,
+          "portraits": [
+            "images/c5242da0ba261b3bc5b6181e.png",
+            "images/c861bf7d69b5d527a08d063c.png"
+          ],
+          "url": "https://raw.communitydragon.org/pbe/game/assets/characters/tft16_tryndamere/hud/tft16_tryndamere_square.png",
+          "source": "CommunityDragon/pbe",
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_tryndamere.png",
+          "official_id": "12405",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "TFT16_Graves",
+          "name": "格雷福斯",
+          "cost": 2,
+          "portraits": [
+            "images/6249b847f90fc2df587429d6.png",
+            "images/52beb00529c3e50ce26f8ea4.png"
+          ],
+          "url": "https://raw.communitydragon.org/pbe/game/assets/characters/tft16_graves/hud/tft16_graves_square.png",
+          "source": "CommunityDragon/pbe",
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_graves.png",
+          "official_id": "12412",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "TFT16_Diana",
+          "name": "黛安娜",
+          "cost": 4,
+          "portraits": [
+            "images/671d1974cab6e910ed878845.png",
+            "images/425bdc97d5505253b0299549.png"
+          ],
+          "url": "https://raw.communitydragon.org/pbe/game/assets/characters/tft16_diana/hud/tft16_diana_square.png",
+          "source": "CommunityDragon/pbe",
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_diana.png",
+          "official_id": "14351",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "jcc16_s16_brand",
+          "name": "布兰德",
+          "portraits": [
+            "images/d5c838b0a73cbe0b5a4c4cfd.png"
+          ],
+          "source": "TencentOfficial/17.17.8b",
+          "cost": 2,
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_brand.png",
+          "official_id": "12422",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "jcc16_s16_alistar",
+          "name": "阿利斯塔",
+          "portraits": [
+            "images/f0ac3ef29adfb20ab907d12e.png"
+          ],
+          "source": "TencentOfficial/17.17.8b",
+          "cost": 3,
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_alistar.png",
+          "official_id": "13355",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "jcc16_s16_viktor",
+          "name": "维克托",
+          "portraits": [
+            "images/ec683e6de2c83dd0a6477636.png"
+          ],
+          "source": "TencentOfficial/17.17.8b",
+          "cost": 3,
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_viktor.png",
+          "official_id": "13475",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "jcc16_s16_malphite",
+          "name": "墨菲特",
+          "portraits": [
+            "images/4613ab02a8d503e52d87fbdd.png"
+          ],
+          "source": "TencentOfficial/17.17.8b",
+          "cost": 3,
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_malphite.png",
+          "official_id": "13357",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "jcc16_s16_sivir",
+          "name": "希维尔",
+          "portraits": [
+            "images/d567584bec98a6e29c513c0b.png"
+          ],
+          "source": "TencentOfficial/17.17.8b",
+          "cost": 3,
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_sivir.png",
+          "official_id": "13356",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "jcc16_s16_shaco",
+          "name": "萨科",
+          "portraits": [
+            "images/e289ee75a28e45345f7b084d.png"
+          ],
+          "source": "TencentOfficial/17.17.8b",
+          "cost": 3,
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_shaco.png",
+          "official_id": "13476",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "jcc16_s16_kayn",
+          "name": "凯隐",
+          "portraits": [
+            "images/bd0d02c9afa85f25363c9fe0.png"
+          ],
+          "source": "TencentOfficial/17.17.8b",
+          "cost": 4,
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_kayn.png",
+          "official_id": "14365",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "jcc16_s16_corki",
+          "name": "库奇",
+          "portraits": [
+            "images/05b4f42063078e73c043c72e.png"
+          ],
+          "source": "TencentOfficial/17.17.8b",
+          "cost": 4,
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_corki.png",
+          "official_id": "14364",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "jcc16_s16_elise",
+          "name": "伊莉丝",
+          "portraits": [
+            "images/a92dc2adff73f8a387fa8a94.png"
+          ],
+          "source": "TencentOfficial/17.17.8b",
+          "cost": 4,
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_elise.png",
+          "official_id": "14367",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "jcc16_s16_hwei",
+          "name": "彗",
+          "portraits": [
+            "images/a1068497ad796a5b1b9f4388.png"
+          ],
+          "source": "TencentOfficial/17.17.8b",
+          "cost": 5,
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_hwei.png",
+          "official_id": "15396",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "jcc16_s16_elder_dragon",
+          "name": "远古巨龙",
+          "portraits": [
+            "images/22813245e788e153c1b3ede2.png"
+          ],
+          "source": "TencentOfficial/17.17.8b",
+          "cost": 5,
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_elder_dragon.png",
+          "official_id": "15400",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "jcc16_s16_jayce",
+          "name": "杰斯",
+          "portraits": [
+            "images/27f6c7f71804836e50217054.png"
+          ],
+          "source": "TencentOfficial/17.17.8b",
+          "cost": 5,
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_jayce.png",
+          "official_id": "15402",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "jcc16_s16_mordekaiser",
+          "name": "莫德凯撒",
+          "portraits": [
+            "images/cc665e4a770583d0a09d1b20.png"
+          ],
+          "source": "TencentOfficial/17.17.8b",
+          "cost": 5,
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_mordekaiser.png",
+          "official_id": "15403",
+          "official_version": "17.17.8b"
+        },
+        {
+          "id": "jcc16_s16_irelia",
+          "name": "艾瑞莉娅",
+          "portraits": [
+            "images/1e853d43a965aa71118cdda2.png"
+          ],
+          "source": "TencentOfficial/17.17.8b",
+          "cost": 5,
+          "official_picture": "https://game.gtimg.cn/images/lol/act/jkzlk/mode16s19/hero/s16_head_irelia.png",
+          "official_id": "15401",
+          "official_version": "17.17.8b"
+        }
+      ],
+      "coverage_note": "已补充金铲铲官方英雄联盟传奇最新标准模式数据；未验证所有限时模式",
+      "official_source": "https://game.gtimg.cn/images/lol/act/jkzlk/js/16/17.17.8b-S19/chess.js",
+      "official_version": "17.17.8b"
+    }
+  }
+}

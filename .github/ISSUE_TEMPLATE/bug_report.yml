@@ -1,0 +1,21 @@
+name: Bug report / 问题反馈
+description: Report a reproducible issue with recognition or interaction.
+body:
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment / 环境
+      description: Windows, Python, MuMu version/path, Android resolution and game season.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps, expected result, actual result / 复现步骤和结果
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Redacted screenshot or log / 去除个人信息的截图或日志
+      description: Do not include account credentials, tokens or unredacted player details.
