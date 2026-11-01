@@ -1,5 +1,7 @@
 # JCCAutoD · 金铲铲商店助手
 
+[![Windows checks](https://github.com/456456bot/JCCAutoD/actions/workflows/ci.yml/badge.svg)](https://github.com/456456bot/JCCAutoD/actions/workflows/ci.yml)
+
 Windows + MuMu 模拟器上的本地商店 OCR 辅助，以及独立的阵容配置工具。
 用户手动刷新商店，程序识别目标卡名并发送购买点击；不读取游戏内部 API。
 
@@ -38,7 +40,11 @@ Windows + MuMu 模拟器上的本地商店 OCR 辅助，以及独立的阵容配
 本机已有头像库的用户无需重新下载。请保留项目目录及其中的 `.venv`。
 
 备用启动入口：`商店助手.pyw` / `阵容配置工具.pyw`，或 `start.bat` / `lineup_tool.bat`。
-重新安装快捷方式可运行 `scripts/install-shortcuts.ps1`。
+重新安装快捷方式可运行：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/install-shortcuts.ps1
+```
 
 ### MuMu 路径与实例
 
