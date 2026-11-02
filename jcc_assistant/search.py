@@ -90,7 +90,7 @@ class RefreshReceipt:
         if now - self.sent_at > 3.0:
             raise ValueError("刷新后未等到可确认的新商店画面，自动搜牌已停止")
         names = tuple(c.name for c in cards)
-        usable = any(c.name and c.confidence >= 0.98 for c in cards)
+        usable = any(c.name and c.confidence >= 0.90 for c in cards)
         if not usable or economy.gold > self.expected_gold:
             self.same_count = 0
             return False
@@ -167,9 +167,9 @@ class AutoSearchSession:
             self.receipt = None
         # Transitions and one difficult NON-target name must not abort a session.
         # Re-read an uncertain shop once; stable names can proceed, while Buyer
-        # still only clicks names with confidence >= .98.
+        # still only clicks names with confidence >= .90.
         uncertain = not any(c.name for c in cards) or any(
-            c.name and c.confidence < 0.98 for c in cards
+            c.name and c.confidence < 0.90 for c in cards
         )
         names_now = tuple(c.name for c in cards)
         if uncertain:
@@ -192,7 +192,7 @@ class AutoSearchSession:
             for card in cards:
                 card.upgrade = levels[card.slot - 1]
         names = targets.snapshot()[1]
-        slots = [c.slot for c in cards if c.name in names and c.confidence >= 0.98]
+        slots = [c.slot for c in cards if c.name in names and c.confidence >= 0.90]
         economy = recognizer.read_economy(image, slots)
         # Only send affordable purchase attempts, reserving the observed card cost.
         result.message = (

@@ -168,6 +168,16 @@ class SearchTests(unittest.TestCase):
         self.step()
         self.assertEqual(self.clicks, [refresh_point((2048, 1536))])
 
+    def test_ninety_percent_target_is_bought_but_below_threshold_is_not(self):
+        frame = self.frame(22, 2, "目标")
+        frame.info["cards"][0].confidence = 0.90
+        frame.info["cards"][1].name = "目标"
+        frame.info["cards"][1].confidence = 0.8999
+        self.frames = [frame, frame.copy(), self.frame(21, 2)]
+        self.step()
+        self.step()
+        self.assertEqual(self.clicks, [(1, 0)])
+
     def test_refresh_receipt_accepts_changed_shop_with_uncertain_non_target(self):
         before = self.frame(22, 2)
         after = self.frame(20, 2, "新牌")

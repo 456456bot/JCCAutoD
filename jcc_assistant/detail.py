@@ -37,6 +37,6 @@ def read_detail_selection(device, recognizer, requested_at, clock=time.perf_coun
     name, score = recognizer.recognize_detail_name(image)
     if clock() - requested_at > 1.5:
         raise ValueError("详情名称识别超时，请保持详情面板后重新按键")
-    if not name or len(name) < 2 or score < 0.98:
+    if not name or len(name) < 2 or score < 0.90:
         raise ValueError("详情英雄名为空或识别不确定，未修改目标列表")
     return name

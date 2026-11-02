@@ -11,6 +11,6 @@ def read_selection(device, recognizer, slot, requested_at, clock=time.perf_count
     card, _ = recognizer.recognize_slot(image, slot)
     if clock() - requested_at > 0.7:
         raise ValueError("选牌识别超时，请重新按键")
-    if not card.name or card.confidence < 0.98:
+    if not card.name or card.confidence < 0.90:
         raise ValueError(f"第 {slot} 栏为空或识别不确定，未添加目标")
     return card.name

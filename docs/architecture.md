@@ -42,7 +42,7 @@ errors clear targets. Tk widgets are updated only through the UI message queue.
 
 | Stage | Acceptance |
 | --- | --- |
-| Shop-name / hotkey OCR | Confidence >= 0.98 |
+| Shop-name / hotkey OCR | Confidence >= 0.90 |
 | Currency and prices | Confidence >= 0.98; refresh cost must be 0, 1 or 2 |
 | Planner portrait | Highest normalized correlation > 0.60; no margin gate |
 | Shop upgrade / planner stars | Color masks and scaled templates with correlation thresholds in source |
@@ -116,5 +116,5 @@ name no longer stops the session or prevents a refresh receipt. Leading/trailing
 middle dots from OCR noise are removed consistently in shop and detail selection;
 internal name separators remain intact.
 Low-confidence exact target names get a small batch of tighter crops before the
-purchase decision; the name must remain identical and reach 98%. This addresses
+purchase decision; the name must remain identical and reach 90%. This addresses
 short names such as 菲兹 without lowering the general purchase threshold.

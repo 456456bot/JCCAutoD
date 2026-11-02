@@ -67,7 +67,7 @@ class Recognizer:
         return [tuple(v - origin[j % 2] for j, v in enumerate(box)) for box in self.regions(size)]
 
     def retry_target(self, crop, name, score, targets):
-        if name not in targets or score >= 0.98:
+        if name not in targets or score >= 0.90:
             return name, score
         w, h = crop.size
         # Remove the card border/padding. Batch two resamplings only for a

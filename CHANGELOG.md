@@ -2,6 +2,9 @@
 
 ## Unreleased — 0.2.0
 
+- Lower shop-name purchase and hotkey selection confidence to 90%; keep currency
+  and refresh-cost recognition at 98%.
+
 - Reprocess uncertain numeric crops and retry transient economy OCR failures for
   two seconds before stopping. Preserve purchase state during post-click retries.
 - Reprocess low-confidence exact target names with tighter crops; add an observed

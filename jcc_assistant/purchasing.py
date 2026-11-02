@@ -97,7 +97,7 @@ class Buyer:
             current_targets = (
                 self.target_list.snapshot()[1] if self.target_list is not None else self.targets
             )
-            if card.name not in current_targets or card.confidence < 0.98:
+            if card.name not in current_targets or card.confidence < 0.90:
                 continue
             if eligible_names is not None and card.name not in eligible_names:
                 continue
