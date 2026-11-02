@@ -96,9 +96,11 @@ only when effective gold minus the observed 0/1/2 cost is >= the current floor.
 This is a refresh floor, not a hard purchase spending limit. No purchase success
 confirmation is added; reservations can conservatively stop earlier.
 
-After a refresh, the session only reads until a usable new shop and sufficient
-coin evidence appear. A paid identical-name shop requires coin deduction and two
-reads. An unobservable free identical-name shop stops after the 3-second receipt
+After a refresh, a reliable nonempty name change proves that the shop changed,
+independently of delayed gold, income or conservative purchase reservations.
+Purchased cards disappearing alone do not prove a refresh. A paid identical-name
+shop requires coin deduction and two reads. An unobservable free identical-name
+shop stops after the 8-second receipt
 timeout. There is no fixed auto-loop delay or simulated player refresh cadence.
 Low-confidence numbers or runtime errors stop auto mode while preserving targets.
 Numeric OCR first retries tighter/enlarged/contrast-adjusted crops with the same

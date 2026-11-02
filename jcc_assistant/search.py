@@ -87,15 +87,22 @@ class RefreshReceipt:
     same_count: int = 0
 
     def ready(self, cards, economy, now):
-        if now - self.sent_at > 3.0:
-            raise ValueError("刷新后未等到可确认的新商店画面，自动搜牌已停止")
         names = tuple(c.name for c in cards)
         usable = any(c.name and c.confidence >= 0.90 for c in cards)
-        if not usable or economy.gold > self.expected_gold:
+        # A newly populated/changed name proves the shop changed independently
+        # of delayed gold updates, income, or conservative purchase reservations.
+        # An old card disappearing alone is a purchase response, not a refresh.
+        if any(c.name and c.confidence >= 0.90 and c.name != self.names[c.slot - 1] for c in cards):
+            return True
+        if now - self.sent_at > 8.0:
+            raise ValueError(
+                "连续 8 秒未看到新商店名称；"
+                f"刷新前 {self.names}，当前 {names}，"
+                f"金币 {economy.gold}，预估余额 {self.expected_gold}"
+            )
+        if not usable or economy.gold > self.expected_gold or names != self.names:
             self.same_count = 0
             return False
-        if names != self.names:
-            return True
         # Paid identical-name refreshes have an observable coin deduction. A free
         # identical shop has no receipt; stop on timeout rather than click blindly.
         self.same_count += 1
@@ -225,7 +232,7 @@ class AutoSearchSession:
             current = economy
         effective_gold = min(current.gold, economy.gold - spent)
         state = control.snapshot()
-        baseline = tuple("" if c.slot in buyer.last_clicks else c.name for c in cards)
+        baseline = tuple(c.name for c in sorted(cards, key=lambda card: card.slot))
         size = image.info.get("android_size", image.size)
 
         def refresh():

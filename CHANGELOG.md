@@ -2,6 +2,10 @@
 
 ## Unreleased — 0.2.0
 
+- Accept reliable new shop names independently of reserved purchase balances or
+  delayed/increased gold. Do not treat purchased cards disappearing as refreshes.
+- Allow up to eight seconds for an unchanged shop; include names and balances
+  in refresh timeout diagnostics.
 - Isolate the white refresh digit from button glow/coin fragments before OCR;
   cover an actual free-refresh zero previously read as the letter o.
 - Audit automatic-search exception stop reasons alongside purchase/refresh events.

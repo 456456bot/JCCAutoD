@@ -302,10 +302,41 @@ class SearchTests(unittest.TestCase):
     def test_stalled_or_free_identical_shop_times_out_without_second_click(self):
         self.frames = [self.frame(20, 0), self.frame(20, 0)]
         self.step()
-        self.clock = 3.1
+        self.clock = 8.1
         with self.assertRaisesRegex(ValueError, "新商店"):
             self.step()
         self.assertEqual(len(self.clicks), 1)
+
+    def test_changed_shop_does_not_wait_for_reserved_purchase_gold(self):
+        self.frames = [
+            self.frame(40, 0, "目标", 3),
+            self.frame(40, 0),
+            self.frame(40, 0, "新的商店"),
+        ]
+        self.step()
+        self.assertEqual(len(self.clicks), 2)
+        self.step()
+        self.assertEqual(len(self.clicks), 3)
+        self.assertTrue(self.control.snapshot().running)
+
+    def test_shop_change_after_income_or_slow_response_is_accepted(self):
+        before = self.frame(22, 2)
+        after = self.frame(30, 2, "新的商店")
+        receipt = RefreshReceipt(tuple(c.name for c in before.info["cards"]), 20, 2, 0)
+        self.assertTrue(receipt.ready(after.info["cards"], Economy(30, 2), 8.5))
+
+    def test_purchase_disappearance_does_not_prove_refresh(self):
+        before = self.frame(30, 0, "目标")
+        after = self.frame(27, 0, "")
+        receipt = RefreshReceipt(tuple(c.name for c in before.info["cards"]), 27, 0, 0)
+        self.assertFalse(receipt.ready(after.info["cards"], Economy(27, 0), 0.3))
+
+    def test_unreliable_changed_name_does_not_prove_refresh(self):
+        before = self.frame(30, 0)
+        after = self.frame(30, 0, "噪声")
+        after.info["cards"][0].confidence = 0.5
+        receipt = RefreshReceipt(tuple(c.name for c in before.info["cards"]), 30, 0, 0)
+        self.assertFalse(receipt.ready(after.info["cards"], Economy(30, 0), 0.3))
 
     def test_paid_identical_names_need_coin_receipt_and_two_reads(self):
         cards = self.frame(20, 2).info["cards"]
