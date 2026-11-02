@@ -334,6 +334,17 @@ def run():
                     if search.current(cycle.epoch):
                         if cycle.mode == AUTOMATIC:
                             epoch = search.stop()
+                            if buyer is not None:
+                                buyer._audit(
+                                    dict(
+                                        outcome="search_stopped",
+                                        error=str(exc),
+                                        epoch=cycle.epoch,
+                                        refresh_count=auto_session.refresh_count
+                                        if auto_session
+                                        else 0,
+                                    )
+                                )
                             messages.put(
                                 (
                                     "search",

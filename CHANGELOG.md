@@ -2,6 +2,9 @@
 
 ## Unreleased — 0.2.0
 
+- Isolate the white refresh digit from button glow/coin fragments before OCR;
+  cover an actual free-refresh zero previously read as the letter o.
+- Audit automatic-search exception stop reasons alongside purchase/refresh events.
 - Lower shop-name purchase and hotkey selection confidence to 90%; keep currency
   and refresh-cost recognition at 98%.
 

@@ -107,6 +107,10 @@ seconds; during this wait no further purchase/refresh clicks are dispatched.
 After a purchase, numeric retries stay inside that step to avoid duplicate buying.
 Persistently unreadable numeric crops and raw scores are saved to
 `artifacts/diagnostics/economy/`; refresh cost is never inferred or reused blindly.
+For the single refresh digit, two brightness masks isolate the largest white
+component and render it black on white, excluding orange button glow and coin
+fragments. OCR still requires 98%; conflicting numeric variants are rejected.
+Automatic-search exceptions are recorded as `search_stopped` audit events.
 Refresh touches are audited as `refresh_sent`, independently of purchase counts.
 
 An uncertain nonempty name sequence is re-read once, or for at most 350ms if it

@@ -6,12 +6,33 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 
+import cv2
 import numpy as np
-from PIL import ImageOps
+from PIL import Image, ImageOps
 
 
 class EconomyReadError(ValueError):
     """A retryable numeric OCR failure, never permission to guess a cost."""
+
+
+def refresh_digit_crops(region):
+    """Isolate the one white digit, excluding button glow and coin fragments."""
+    pixels = np.asarray(region.convert("RGB")).astype(float)
+    variants = []
+    for threshold in (160, 200):
+        mask = np.uint8(
+            (pixels.min(axis=2) > threshold) & (pixels.max(axis=2) - pixels.min(axis=2) < 70)
+        )
+        count, labels, stats, _ = cv2.connectedComponentsWithStats(mask)
+        if count < 2:
+            continue
+        index = 1 + stats[1:, cv2.CC_STAT_AREA].argmax()
+        x, y, w, h, area = stats[index]
+        if h < region.height * 0.25 or area < 8 or area > mask.size * 0.65:
+            continue
+        digit = Image.fromarray(np.uint8(labels[y : y + h, x : x + w] != index) * 255)
+        variants.append(ImageOps.expand(digit, border=4, fill=255).convert("RGB"))
+    return variants
 
 
 def numeric_value(text, score, key):
@@ -70,6 +91,8 @@ def read_economy(engine, image, price_slots=()):
                 tight.resize((w * 3, tight.height * 3)),
                 ImageOps.autocontrast(tight.convert("L")).convert("RGB"),
             ]
+            if key == "refresh":
+                variants.extend(refresh_digit_crops(region))
             retry = engine.recognize_txt([np.asarray(p)[:, :, ::-1].copy() for p in variants])
             candidates = [
                 numeric_value(t, s, key) for t, s in zip(retry.txts or (), retry.scores or ())

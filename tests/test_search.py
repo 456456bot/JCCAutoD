@@ -316,6 +316,16 @@ class SearchTests(unittest.TestCase):
 
 
 class EconomyTests(unittest.TestCase):
+    def test_actual_free_refresh_glow_reads_zero_at_original_threshold(self):
+        recognizer = Recognizer()
+        with (
+            Image.open("tests/fixtures/refresh_zero_glow.png") as cost,
+            Image.open("assets/economy/gold_52.png") as gold,
+        ):
+            image = Image.new("RGB", (10, 10))
+            image.info["economy_regions"] = {"gold": gold.copy(), "refresh": cost.copy()}
+            self.assertEqual(recognizer.read_economy(image), Economy(52, 0))
+
     def test_uncertain_refresh_is_reprocessed_without_guessing_cost(self):
         outputs = iter(
             [
