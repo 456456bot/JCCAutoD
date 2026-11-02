@@ -101,6 +101,12 @@ coin evidence appear. A paid identical-name shop requires coin deduction and two
 reads. An unobservable free identical-name shop stops after the 3-second receipt
 timeout. There is no fixed auto-loop delay or simulated player refresh cadence.
 Low-confidence numbers or runtime errors stop auto mode while preserving targets.
+Numeric OCR first retries tighter/enlarged/contrast-adjusted crops with the same
+98% acceptance threshold. Transient failures then re-read frames for up to two
+seconds; during this wait no further purchase/refresh clicks are dispatched.
+After a purchase, numeric retries stay inside that step to avoid duplicate buying.
+Persistently unreadable numeric crops and raw scores are saved to
+`artifacts/diagnostics/economy/`; refresh cost is never inferred or reused blindly.
 Refresh touches are audited as `refresh_sent`, independently of purchase counts.
 
 An uncertain nonempty name sequence is re-read once, or for at most 350ms if it
@@ -109,3 +115,6 @@ blank shop waits up to three seconds before stopping. One difficult non-target
 name no longer stops the session or prevents a refresh receipt. Leading/trailing
 middle dots from OCR noise are removed consistently in shop and detail selection;
 internal name separators remain intact.
+Low-confidence exact target names get a small batch of tighter crops before the
+purchase decision; the name must remain identical and reach 98%. This addresses
+short names such as 菲兹 without lowering the general purchase threshold.

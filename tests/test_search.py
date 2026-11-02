@@ -6,7 +6,7 @@ from types import SimpleNamespace
 
 from PIL import Image
 
-from jcc_assistant.economy import Economy, read_economy, refresh_point
+from jcc_assistant.economy import Economy, EconomyReadError, read_economy, refresh_point
 from jcc_assistant.purchasing import Buyer
 from jcc_assistant.recognition import Card, Recognizer
 from jcc_assistant.search import AUTOMATIC, MANUAL, AutoSearchSession, RefreshReceipt, SearchControl
@@ -93,6 +93,51 @@ class SearchTests(unittest.TestCase):
         self.assertFalse(self.clicks)
         self.step()
         self.assertEqual(self.clicks, [refresh_point((2048, 1536))])
+
+    def test_numeric_failure_retries_without_clicking_or_stopping(self):
+        self.frames = [self.frame(22, 2), self.frame(22, 2)]
+        original = self.ocr.read_economy
+        failures = [True, False]
+
+        def read(*args):
+            if failures.pop(0):
+                raise EconomyReadError("refresh 数字识别不确定")
+            return original(*args)
+
+        self.ocr.read_economy = read
+        self.assertIn("重试", self.step().note)
+        self.assertFalse(self.clicks)
+        self.assertTrue(self.control.snapshot().running)
+        self.step()
+        self.assertEqual(len(self.clicks), 1)
+
+    def test_numeric_retry_timeout_is_bounded(self):
+        self.frames = [self.frame(22, 2), self.frame(22, 2)]
+
+        def fail(*args):
+            raise EconomyReadError("refresh 数字识别不确定")
+
+        self.ocr.read_economy = fail
+        self.step()
+        self.clock = 2.1
+        with self.assertRaisesRegex(ValueError, "连续 2 秒"):
+            self.step()
+        self.assertFalse(self.clicks)
+
+    def test_post_purchase_numeric_retry_does_not_repeat_purchase(self):
+        self.frames = [self.frame(30, 2, "目标"), self.frame(29, 2), self.frame(29, 2)]
+        original = self.ocr.read_economy
+        calls = []
+
+        def read(*args):
+            calls.append(True)
+            if len(calls) == 2:
+                raise EconomyReadError("refresh 数字识别不确定")
+            return original(*args)
+
+        self.ocr.read_economy = read
+        self.step()
+        self.assertEqual(self.clicks, [(1, 0), refresh_point((2048, 1536))])
 
     def test_blank_transition_waits_and_recovers_without_clicks(self):
         blank = self.frame(22, 2)
@@ -261,6 +306,28 @@ class SearchTests(unittest.TestCase):
 
 
 class EconomyTests(unittest.TestCase):
+    def test_uncertain_refresh_is_reprocessed_without_guessing_cost(self):
+        outputs = iter(
+            [
+                SimpleNamespace(txts=("20", "2"), scores=(1, 0.8)),
+                SimpleNamespace(txts=("2", "2"), scores=(0.995, 0.99)),
+            ]
+        )
+        engine = SimpleNamespace(recognize_txt=lambda crops: next(outputs))
+        image = Image.new("RGB", (2048, 1536))
+        self.assertEqual(read_economy(engine, image), Economy(20, 2))
+
+    def test_conflicting_refresh_variants_are_rejected(self):
+        outputs = iter(
+            [
+                SimpleNamespace(txts=("20", "2"), scores=(1, 0.8)),
+                SimpleNamespace(txts=("0", "2"), scores=(0.995, 0.99)),
+            ]
+        )
+        engine = SimpleNamespace(recognize_txt=lambda crops: next(outputs))
+        with self.assertRaises(EconomyReadError):
+            read_economy(engine, Image.new("RGB", (2048, 1536)))
+
     def test_real_shop_and_user_currency_crops(self):
         recognizer = Recognizer()
         with Image.open("tests/fixtures/shop.png") as image:

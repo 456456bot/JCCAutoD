@@ -2,6 +2,11 @@
 
 ## Unreleased — 0.2.0
 
+- Reprocess uncertain numeric crops and retry transient economy OCR failures for
+  two seconds before stopping. Preserve purchase state during post-click retries.
+- Reprocess low-confidence exact target names with tighter crops; add an observed
+  Fizz regression fixture that previously fell below the purchase threshold.
+- Save failed numeric crops and raw OCR scores locally for diagnosis.
 - Retry transient/uncertain shop names instead of aborting auto-search for a
   non-target OCR score; retain the confidence gate on purchases and currency.
 - Strip spurious leading/trailing OCR middle dots, including the observed 菲兹·.

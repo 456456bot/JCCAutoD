@@ -1,9 +1,25 @@
 """Read small currency/price regions from the same Android shop frame."""
 
+import json
 import re
 from dataclasses import dataclass, field
+from datetime import datetime
+from pathlib import Path
 
 import numpy as np
+from PIL import ImageOps
+
+
+class EconomyReadError(ValueError):
+    """A retryable numeric OCR failure, never permission to guess a cost."""
+
+
+def numeric_value(text, score, key):
+    text = text.strip()
+    if not re.fullmatch(r"[0-9]{1,4}", text) or not np.isfinite(score) or score < 0.98:
+        return None
+    value = int(text)
+    return value if key != "refresh" or value in (0, 1, 2) else None
 
 
 def economy_boxes(size):
@@ -35,15 +51,52 @@ def read_economy(engine, image, price_slots=()):
     keys = ["gold", "refresh"] + [f"price_{slot}" for slot in sorted(set(price_slots))]
     crops = [np.asarray(regions[key].convert("RGB"))[:, :, ::-1].copy() for key in keys]
     result = engine.recognize_txt(crops)
-    if result.txts is None or result.scores is None or len(result.txts) != len(keys):
-        raise ValueError("金币或刷新费用未识别，自动搜牌已停止")
+    if (
+        result.txts is None
+        or result.scores is None
+        or len(result.txts) != len(keys)
+        or len(result.scores) != len(keys)
+    ):
+        raise EconomyReadError("金币或刷新费用未识别")
     values = {}
     for key, txt, score in zip(keys, result.txts, result.scores):
-        text = txt.strip()
-        if not re.fullmatch(r"[0-9]{1,4}", text) or not np.isfinite(score) or score < 0.98:
-            raise ValueError(f"{key} 数字识别不确定，自动搜牌已停止")
-        values[key] = int(text)
-    if values["refresh"] not in (0, 1, 2):
-        raise ValueError("刷新费用不在 0／1／2 范围内，自动搜牌已停止")
+        value = numeric_value(txt, score, key)
+        if value is None:
+            region = regions[key].convert("RGB")
+            # Native tiny crops often include borders and excessive vertical padding.
+            w, h = region.size
+            tight = region.crop((0, round(h * 0.12), w, round(h * 0.9)))
+            variants = [
+                tight.resize((w * 3, tight.height * 3)),
+                ImageOps.autocontrast(tight.convert("L")).convert("RGB"),
+            ]
+            retry = engine.recognize_txt([np.asarray(p)[:, :, ::-1].copy() for p in variants])
+            candidates = [
+                numeric_value(t, s, key) for t, s in zip(retry.txts or (), retry.scores or ())
+            ]
+            valid = {v for v in candidates if v is not None}
+            if len(valid) == 1:
+                value = valid.pop()
+            else:
+                folder = Path("artifacts/diagnostics/economy")
+                folder.mkdir(parents=True, exist_ok=True)
+                region.save(folder / f"{key}.png")
+                (folder / f"{key}.json").write_text(
+                    json.dumps(
+                        {
+                            "time": datetime.now().isoformat(),
+                            "key": key,
+                            "text": str(txt),
+                            "confidence": float(score),
+                            "retry_texts": list(retry.txts or ()),
+                            "retry_scores": [float(s) for s in (retry.scores or ())],
+                        },
+                        ensure_ascii=False,
+                        indent=2,
+                    ),
+                    encoding="utf-8",
+                )
+                raise EconomyReadError(f"{key} 数字识别不确定（读到 {txt!r}，置信度 {score:.1%}）")
+        values[key] = value
     prices = {slot: values[f"price_{slot}"] for slot in set(price_slots)}
     return Economy(values["gold"], values["refresh"], prices)

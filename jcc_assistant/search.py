@@ -4,7 +4,7 @@ import threading
 import time
 from dataclasses import dataclass
 
-from .economy import refresh_point
+from .economy import EconomyReadError, refresh_point
 
 MANUAL = "手动刷新辅助"
 AUTOMATIC = "自动搜牌"
@@ -121,11 +121,42 @@ class AutoSearchSession:
         self.refresh_count = 0
         self.uncertain_since = None
         self.uncertain_names = None
+        self.numeric_since = None
+        self.last_result = None
+
+    def read_economy(self, device, recognizer, image, control, slots=()):
+        # Retry in place: especially after purchases, restarting the whole step
+        # could buy the same still-visible card again. No clicks occur here.
+        deadline = time.perf_counter() + 2.0
+        while True:
+            if not control.current(self.epoch):
+                raise RuntimeError("搜牌已取消")
+            try:
+                return recognizer.read_economy(image, slots)
+            except EconomyReadError as exc:
+                if time.perf_counter() >= deadline:
+                    raise RuntimeError(f"数字连续 2 秒识别失败：{exc}") from exc
+                image, _ = device.capture_shop()
 
     def step(self, device, recognizer, buyer, targets, control, detector):
+        try:
+            result = self._step(device, recognizer, buyer, targets, control, detector)
+        except EconomyReadError as exc:
+            now = self.clock()
+            if self.numeric_since is None:
+                self.numeric_since = now
+            if now - self.numeric_since >= 2:
+                raise ValueError(f"数字连续 2 秒识别失败：{exc}") from exc
+            self.last_result.note = f"自动搜牌：等待数字清晰后重试；{exc}"
+            return self.last_result
+        self.numeric_since = None
+        return result
+
+    def _step(self, device, recognizer, buyer, targets, control, detector):
         image, capture_ms = device.capture_shop()
         cards, ocr_ms, _ = recognizer.recognize(image, targets.snapshot()[1])
         result = AutoStep(image, cards, capture_ms, ocr_ms)
+        self.last_result = result
         if not control.current(self.epoch):
             return result
         if self.receipt:
@@ -189,7 +220,7 @@ class AutoSearchSession:
         # and read current coins/cost once more if purchases may have changed them.
         if buyer.last_clicks:
             latest, _ = device.capture_shop()
-            current = recognizer.read_economy(latest)
+            current = self.read_economy(device, recognizer, latest, control)
         else:
             current = economy
         effective_gold = min(current.gold, economy.gold - spent)

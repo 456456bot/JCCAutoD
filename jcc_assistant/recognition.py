@@ -66,6 +66,26 @@ class Recognizer:
         origin = image.info.get("origin", (0, 0))
         return [tuple(v - origin[j % 2] for j, v in enumerate(box)) for box in self.regions(size)]
 
+    def retry_target(self, crop, name, score, targets):
+        if name not in targets or score >= 0.98:
+            return name, score
+        w, h = crop.size
+        # Remove the card border/padding. Batch two resamplings only for a
+        # low-confidence exact target, never fuzzy-map a different hero.
+        tight = crop.crop((0, round(h * 0.1), w, round(h * 0.9)))
+        variants = [
+            tight,
+            tight.resize((round(w * 0.75), tight.height)),
+            crop.crop((round(w * 0.05), round(h * 0.1), w, round(h * 0.9))),
+        ]
+        output = self.engine.recognize_txt(
+            [np.asarray(p.convert("RGB"))[:, :, ::-1].copy() for p in variants]
+        )
+        for text, confidence in zip(output.txts or (), output.scores or ()):
+            if clean_name(text) == name and confidence > score:
+                score = float(confidence)
+        return name, score
+
     def recognize_slot(self, image, slot, targets=()):
         start = time.perf_counter()
         box = self.regions_for(image)[slot - 1]
@@ -73,6 +93,7 @@ class Recognizer:
         output = self.engine.recognize_txt([crop])
         name = clean_name(output.txts[0]) if output.txts else ""
         score = float(output.scores[0]) if output.scores else 0.0
+        name, score = self.retry_target(image.crop(box), name, score, targets)
         width, height = image.info.get("android_size", image.size)
         center = (round((575 + (slot - 1) * 300) * width / 2048), round(1370 * height / 1536))
         return Card(slot, name, round(score, 4), center, bool(name) and name in targets), (
@@ -99,6 +120,9 @@ class Recognizer:
         cards = []
         for i in range(5):
             name, score = found.get(i, ("", 0.0))
+            name, score = self.retry_target(
+                image.crop(self.regions_for(image)[i]), name, score, targets
+            )
             width, height = image.info.get("android_size", image.size)
             center = (round((575 + i * 300) * width / 2048), round(1370 * height / 1536))
             cards.append(Card(i + 1, name, round(score, 4), center, name in targets and bool(name)))
